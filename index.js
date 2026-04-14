@@ -1,25 +1,28 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 
+var ano = 2013;
+
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
 });
 
-client.once('ready', () => {
+client.once('clientReady', () => {
   console.log('Bot online!');
 });
 
+//comando ping
 client.on('messageCreate', message => {
   if (message.content === '*ping') {
     message.reply('Pong!');
   }
 });
 
-// comando !ano
+// comando ano
 client.on('messageCreate', message => {
   if (message.author.bot) return;
 
-  if (message.content === '!ano') {
-    message.reply('Ano atual: ' + ano);
+  if (message.content === '*ano') {
+    message.reply("# " + ano + " #");
   }
 });
 
@@ -29,9 +32,9 @@ function atualizarAno() {
 
   fs.writeFileSync('ano.json', JSON.stringify({ ano: ano }));
 
-  console.log('Ano atualizado para: ' + ano);
+  console.log("# " + ano + " #");
 
-  const canal = client.channels.cache.get('826216641363968005');
+  const canal = client.channels.cache.get('1488786657434927224');
 
   if (canal) {
     canal.send(ano); 
@@ -57,3 +60,35 @@ setTimeout(() => {
 }, tempoAteMeiaNoite());
 
 client.login(process.env.TOKEN);
+
+client.on('messageCreate', message => {
+  if (message.author.bot) return;
+
+  if (message.content.startsWith('*pais ')) {
+    const nome = message.content.replace('*pais ', '').trim();
+
+    db.get(
+      'SELECT * FROM paises WHERE nome = ?',
+      [nome],
+      (err, row) => {
+        if (err) {
+          console.error(err);
+          return message.reply('Erro ao buscar o país.');
+        }
+
+        if (!row) {
+          return message.reply('País não encontrado.');
+        }
+
+        message.reply(
+`🌍 ${row.nome}
+💰 Dinheiro: ${row.dinheiro}
+👥 População: ${row.populacao}
+🪖 Exército: ${row.exercito}
+📉 Estabilidade: ${row.estabilidade}`
+        );
+      }
+    );
+  }
+});
+
